@@ -1,0 +1,30 @@
+{
+	"name": "plugapi",
+	"version": "0.3.0",
+	"author": "Chris Vickery <chrisinajar@gmail.com>",
+	"contributors": [
+		{
+			"name": "ging"
+		},
+		{
+			"name": "Nicolas Jeker",
+			"email": "n.jeker@gmx.net"
+		}
+	],
+	"description": "Generic API for building Plug.dj bots",
+	"main": "./src/index.js",
+	"lib": "./src/index.js",
+	"dependencies": {
+		"coffee-script": "*",
+		"node-uuid": "*",
+		"node-html-encoder": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chrisinajar/plugapi"
+	},
+	"license": "freeBSD",
+	"engines": {
+		"node": ">=0.6"
+	}
+}

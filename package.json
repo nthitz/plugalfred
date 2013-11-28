@@ -1,0 +1,11 @@
+{
+	"name": "alfred",
+	"version": "0.1.0",
+	"dependencies": {
+		"ws": "*",
+		"request": "*",
+		"coffee-script": "*",
+		"node-uuid": "*",
+		"node-html-encoder": "*"
+	}
+}
