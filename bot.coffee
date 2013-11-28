@@ -15,6 +15,11 @@ bot.on('connected', () ->
     );
 )
 bot.on('chat', (data) ->
+    lowercase = data.message.toLowerCase()
+    if (lowercase.indexOf('bot') isnt -1 or lowercase.indexOf('alfred') isnt -1) and lowercase.indexOf('dance') isnt -1
+        bot.vote('up',() ->
+            console.log 'wooted'
+        )
     console.log(data)
     if (data.type == 'emote')
         console.log(data.from+data.message)
