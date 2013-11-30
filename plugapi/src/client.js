@@ -217,15 +217,12 @@
       switch (name) {
         case 'room.join':
           this.emit('roomChanged', data);
-          console.log(data)
-
+          
           if(typeof data.room !== 'undefined') {
-            console.log(data.room)
             if(typeof data.room.historyID !== 'undefined') {
               this.userId = data.user.profile.id;
-          this.roomId = data.room.id;
+              this.roomId = data.room.id;
               this.historyID = data.room.historyID
-              console.log('history id ' + data.room.historyID)
             }
           }
       }
@@ -312,8 +309,7 @@
       return this.sendRPC('room.join', [name], function(data) {
 		  return _this.sendRPC('room.details', [name], function(data) {
 				return _this.initRoom(data, function() {
-          console.log(data);
-				  _this.historyID = data.room.historyID
+          _this.historyID = data.room.historyID
           if (callback != null) {
 
 					return callback(data);
