@@ -11,7 +11,7 @@ bot.connect(ROOM);
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
         # data object has information on the room - list of users, song currently playing, etc.
-        console.log("Joined " + ROOM + ": ", data);
+     #   console.log("Joined " + ROOM + ": ", data);
     );
 )
 bot.on('chat', (data) ->

@@ -217,9 +217,17 @@
       switch (name) {
         case 'room.join':
           this.emit('roomChanged', data);
-//          this.userId = data.user.profile.id;
-//          this.roomId = data.room.id;
-//          return this.historyID = data.room.historyID;
+          console.log(data)
+
+          if(typeof data.room !== 'undefined') {
+            console.log(data.room)
+            if(typeof data.room.historyID !== 'undefined') {
+              this.userId = data.user.profile.id;
+          this.roomId = data.room.id;
+              this.historyID = data.room.historyID
+              console.log('history id ' + data.room.historyID)
+            }
+          }
       }
     };
 
@@ -304,7 +312,10 @@
       return this.sendRPC('room.join', [name], function(data) {
 		  return _this.sendRPC('room.details', [name], function(data) {
 				return _this.initRoom(data, function() {
-				  if (callback != null) {
+          console.log(data);
+				  _this.historyID = data.room.historyID
+          if (callback != null) {
+
 					return callback(data);
 				}
 			});
@@ -354,6 +365,7 @@
     };
 
     PlugAPI.prototype.upvote = function(callback) {
+      console.log(this.historyID)
       this.sendRPC("room.cast", [true, this.historyID, this.lastHistoryID === this.historyID], callback);
       return this.lastHistoryID = this.historyID;
     };
