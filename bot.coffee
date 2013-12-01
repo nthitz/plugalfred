@@ -101,10 +101,7 @@ skipUserSongLengthSkip = () ->
     bot.moderateRemoveDJ(currentDJ.id)
 ###
 userSkip = () ->
-    if currentDJ is null
-        return
-    console.log 'skip ' + currentDJ.username
-    
+    console.log 'skipping someone'    
     bot.skipSong((data) ->
         console.log 'skip callback'
         console.log data
