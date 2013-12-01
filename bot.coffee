@@ -12,19 +12,27 @@ enforceSongLength = true
 songLengthRelaxing = false
 songLengthLimitSkipTimeout = null
 songLengthLimitWarnTimeout = null
+autoSkipTimeout = null
 currentDJName = null
 currentDJ = null
 bot.connect(ROOM);
-
+enableAutoSkip = true
+botadmins = ['5164d7883b79036fc28a56a9']
+roomStaff = []
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
-        currentDJ = data.room.djs[0].user
-        currentDJName = currentDJ.username
-        console.log 'now up ' + currentDJName
+        console.log data
+        roomStaff = data.room.staff
+        if data.room.djs.length > 0
+            currentDJ = data.room.djs[0].user
+            console.log currentDJ
+        console.log 'now up ' + currentDJ.username
     );
 )
 bot.on('chat', (data) ->
     lowercase = data.message.toLowerCase()
+    fromBotAdmin = isBotAdmin(data.fromID)
+    fromStaff = isRoomStaff(data.fromID)
     if (lowercase.indexOf('bot') isnt -1 or lowercase.indexOf('alfred') isnt -1) and lowercase.indexOf('dance') isnt -1
         bot.vote('up',() ->
             console.log 'wooted'
@@ -40,13 +48,13 @@ bot.on('chat', (data) ->
             songLengthLimit = param 
             songLengthLimitSeconds = songLengthLimit * 60
             bot.chat 'The time limit is now ' + param + ' minutes.'
-    if lowercase.match('(bot|alfred) relax')
+    if lowercase.match('(bot|alfred) relax') and fromStaff
         songLengthRelaxing = true
         clearTimeout songLengthLimitSkipTimeout
         clearTimeout songLengthLimitWarnTimeout
         bot.chat 'I\'m chiller than you are dude.'
-    if lowercase.match('(bot|alfred) skip')
-        skipUserSongLengthSkip()
+    if lowercase.match('(bot|alfred) skip') and fromStaff
+        userSkip()
     #console.log(data)
     if (data.type == 'emote')
         console.log(data.from+data.message)
@@ -55,27 +63,55 @@ bot.on('chat', (data) ->
 )
 
 bot.on('djAdvance', (data) ->
-    currentDJ = data.djs[0].user
-    currentDJName = data.djs[0].user.username
+    if data.djs.length > 0
+        currentDJ = data.djs[0].user
+    else
+        currentDJ = null
     clearTimeout(songLengthLimitSkipTimeout)
     clearTimeout songLengthLimitWarnTimeout
-
+    clearTimeout autoSkipTimeout
     #console.log(data)
     #sconsole.log data.djs[0]
     songLengthRelaxing = false
+    if typeof data.media is 'undefined' or data.media is null
+        return
     if data.media.duration > songLengthLimitSeconds and enforceSongLength
         skipAt = data.media.duration - songLengthLimitSeconds
         min =  Math.floor(skipAt % 60)
         if min < 10
             min = '0' + min
         skipAtStr = Math.floor(skipAt / 60) + ":" + min
-        bot.chat "@" + currentDJName + "Your song is longer than the limit of " + songLengthLimit + " minutes. Please skip when there is " + skipAtStr + ' remaining.'
+        bot.chat "@" + currentDJ.username + "Your song is longer than the limit of " + songLengthLimit + " minutes. Please skip when there is " + skipAtStr + ' remaining.'
         songLengthLimitWarnTimeout = setTimeout(warnUserSongLengthSkip, (songLengthLimitSeconds - 15) * 1000)
-        songLengthLimitSkipTimeout = setTimeout(skipUserSongLengthSkip, songLengthLimitSeconds * 1000)
+        songLengthLimitSkipTimeout = setTimeout(userSkip, songLengthLimitSeconds * 1000)
+
+    if enableAutoSkip
+        autoSkipTimeout = setTimeout userSkip, (data.media.duration + 3)* 1000
 )
 warnUserSongLengthSkip = () ->
     console.log 'warn'
-    bot.chat "@"+ currentDJName + " you have 15 seconds to skip before being escorted"
+    if currentDJ is null
+        return
+    bot.chat "@"+ currentDJ.username + " you have 15 seconds to skip before being escorted"
+###
 skipUserSongLengthSkip = () ->
-    console.log 'kick ' + currentDJName
+    if currentDJ is null
+        return
+    console.log 'kick ' + currentDJ.username
     bot.moderateRemoveDJ(currentDJ.id)
+###
+userSkip = () ->
+    if currentDJ is null
+        return
+    console.log 'skip ' + currentDJ.username
+    
+    bot.skipSong((data) ->
+        console.log 'skip callback'
+        console.log data
+        return;
+    )
+    #bot.moderateForceSkip()
+isBotAdmin = (userid) ->
+    return botadmins.indexOf(userid) isnt -1
+isRoomStaff = (userid) ->
+    return typeof roomStaff[userid] isnt 'undefined'
