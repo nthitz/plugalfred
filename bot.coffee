@@ -52,7 +52,7 @@ bot.on('chat', (data) ->
         songLengthRelaxing = true
         clearTimeout songLengthLimitSkipTimeout
         clearTimeout songLengthLimitWarnTimeout
-        bot.chat 'I\'m chiller than you are dude.'
+        bot.chat 'I\'m calmer than you are.'
     if lowercase.match('(bot|alfred) skip') and fromStaff
         userSkip()
     #console.log(data)
