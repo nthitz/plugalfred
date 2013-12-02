@@ -78,10 +78,18 @@ bot.on('djAdvance', (data) ->
         return
     if data.media.duration > songLengthLimitSeconds and enforceSongLength
         skipAt = data.media.duration - songLengthLimitSeconds
-        min =  Math.floor(skipAt % 60)
-        if min < 10
-            min = '0' + min
-        skipAtStr = Math.floor(skipAt / 60) + ":" + min
+        hours = Math.floor(skipAt / (60 * 60))
+        if hours is 0
+            hours = ''
+        else
+            hours += ':'
+        mins = Math.floor((skipAt % (60 * 60))/ 60)
+        if mins < 10 and hours isnt ''
+            mins = '0' + mins
+        seconds =  Math.floor(skipAt % 60)
+        if seconds < 10
+            seconds = '0' + seconds
+        skipAtStr = hours + mins + ":" + seconds
         bot.chat "@" + currentDJ.username + "Your song is longer than the limit of " + songLengthLimit + " minutes. Please skip when there is " + skipAtStr + ' remaining.'
         songLengthLimitWarnTimeout = setTimeout(warnUserSongLengthSkip, (songLengthLimitSeconds - 15) * 1000)
         songLengthLimitSkipTimeout = setTimeout(userSkip, songLengthLimitSeconds * 1000)
