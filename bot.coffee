@@ -15,13 +15,12 @@ songLengthLimitWarnTimeout = null
 autoSkipTimeout = null
 currentDJName = null
 currentDJ = null
-bot.connect(ROOM);
 enableAutoSkip = true
 botadmins = ['5164d7883b79036fc28a56a9']
 roomStaff = []
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
-        console.log data
+        #console.log data
         roomStaff = data.room.staff
         if data.room.djs.length > 0
             currentDJ = data.room.djs[0].user
@@ -29,6 +28,8 @@ bot.on('connected', () ->
         console.log 'now up ' + currentDJ.username
     );
 )
+
+bot.connect(ROOM);
 bot.on('chat', (data) ->
     lowercase = data.message.toLowerCase()
     fromBotAdmin = isBotAdmin(data.fromID)
