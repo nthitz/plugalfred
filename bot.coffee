@@ -56,7 +56,6 @@ bot.on('chat', (data) ->
         bot.chat 'I\'m calmer than you are.'
     if lowercase.match('(bot|alfred) skip') and fromStaff
         userSkip()
-    #console.log(data)
     if (data.type == 'emote')
         console.log(data.from+data.message)
     else
@@ -97,6 +96,18 @@ bot.on('djAdvance', (data) ->
     if enableAutoSkip
         autoSkipTimeout = setTimeout userSkip, (data.media.duration + 3)* 1000
 )
+
+reconnect = () ->
+    bot.connect('mashupfm');
+
+bot.on('close', reconnect);
+bot.on('error', reconnect);
+
+
+
+
+
+
 warnUserSongLengthSkip = () ->
     console.log 'warn'
     if currentDJ is null
