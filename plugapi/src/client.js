@@ -306,7 +306,7 @@
 
     PlugAPI.prototype.joinRoom = function(name, callback) {
       var _this = this;
-      return this.sendRPC('room.join', [name,'fe940d'], function(data) {
+      return this.sendRPC('room.join', [name,'$&2h72=^^@jdBf_n!`-38UHs'], function(data) {
 		  return _this.sendRPC('room.details', [name], function(data) {
 				return _this.initRoom(data, function() {
           _this.historyID = data.room.historyID
