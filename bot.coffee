@@ -18,6 +18,8 @@ currentDJ = null
 enableAutoSkip = false
 botadmins = ['5164d7883b79036fc28a56a9']
 roomStaff = []
+cycleLimits = [5,10]
+cycleLimits = [1,2]
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
         #console.log data
@@ -95,6 +97,11 @@ bot.on('djAdvance', (data) ->
 
     if enableAutoSkip
         autoSkipTimeout = setTimeout userSkip, (data.media.duration + 3)* 1000
+    #djsInLine = data.djs.length
+    #if djsInLine >= cycleLimits[1]
+    #    
+    #else if djsInLine <= cycleLimits[0]
+        
 )
 
 reconnect = () ->
