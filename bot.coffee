@@ -129,12 +129,14 @@ skipUserSongLengthSkip = () ->
 ###
 userSkip = () ->
     console.log 'skipping someone'    
+    bot.moderateRemoveDJ(currentDJ.id,"Too long")
+    return
     bot.skipSong((data) ->
         console.log 'skip callback'
         console.log data
         return;
     )
-    #bot.moderateForceSkip()
+    bot.moderateForceSkip()
 isBotAdmin = (userid) ->
     return botadmins.indexOf(userid) isnt -1
 isRoomStaff = (userid) ->
