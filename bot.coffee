@@ -20,8 +20,10 @@ botadmins = ['5164d7883b79036fc28a56a9']
 roomStaff = []
 cycleLimits = [5,10]
 cycleLimits = [1,2]
-afkLimit = 60 * 1000 * 60
+enforceAFKAtHowManyDJs = 5
+afkLimit = 60 * 60 * 1000
 mehLimit = 5
+bootTime = Date.now()
 lastUserChats = {}
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
@@ -79,6 +81,8 @@ bot.on('djAdvance', (data) ->
     clearTimeout songLengthLimitWarnTimeout
     clearTimeout autoSkipTimeout
     #sconsole.log data.djs[0]
+    if data.djs.length >= enforceAFKAtHowManyDJs
+        enforceAFK(data.djs)
     songLengthRelaxing = false
     if typeof data.media is 'undefined' or data.media is null
         return
@@ -108,6 +112,28 @@ bot.on('djAdvance', (data) ->
     #else if djsInLine <= cycleLimits[0]
         
 )
+enforceAFK = (djs) ->
+    if djs.length < 2
+        return
+    time = Date.now()
+    minActionTime = time - afkLimit
+    checkIfCurDJStillAFK(djs[0].user,minActionTime)
+    checkIfOnDeckAFK(djs[1].user,minActionTime)
+checkIfCurDJStillAFK = (dj, timeLimit) ->
+    if typeof lastUserChats[dj.id] is 'undefined'
+        lastUserChats[dj.id] = Date.now()
+        return
+    lastChat = lastUserChats[dj.id]
+    if lastChat is -1
+        bot.chat "@"+dj.username + " please stay active to dj"
+        bot.moderateRemoveDJ(currentDJ.id,"Too long")
+checkIfOnDeckAFK = (dj, timeLimit) ->
+    if typeof lastUserChats[dj.id] is 'undefined'
+        return
+    lastChat = lastUserChats[dj.id]
+    if lastChat < timeLimit
+        bot.chat "@" + dj.username + " are you still there? You are on deck! Please chat to ensure you are active!"
+        lastUserChats[dj.id] = -1
 bot.on('voteUpdate', (data) ->
     curVotes[data.id] = data.vote
     numMehs = 0
