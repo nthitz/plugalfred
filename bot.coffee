@@ -81,7 +81,7 @@ bot.on('djAdvance', (data) ->
     clearTimeout songLengthLimitWarnTimeout
     clearTimeout autoSkipTimeout
     #sconsole.log data.djs[0]
-    if data.djs.length >= enforceAFKAtHowManyDJs
+    if data.djs.length > enforceAFKAtHowManyDJs
         enforceAFK(data.djs)
     songLengthRelaxing = false
     if typeof data.media is 'undefined' or data.media is null
