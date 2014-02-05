@@ -4,7 +4,7 @@ PlugAPI = require("./plugapi");
 
 AUTH = process.env.AUTH
 ROOM = "mashupfm";
-bot = new PlugAPI(AUTH);
+bot = new PlugAPI(AUTH, "p9R*");
 
 songLengthLimit = 8
 songLengthLimitSeconds = songLengthLimit * 60
@@ -20,6 +20,9 @@ botadmins = ['5164d7883b79036fc28a56a9']
 roomStaff = []
 cycleLimits = [5,10]
 cycleLimits = [1,2]
+afkLimit = 60 * 1000 * 60
+mehLimit = 5
+lastUserChats = {}
 bot.on('connected', () ->
     bot.joinRoom(ROOM, (data) ->
         #console.log data
@@ -34,6 +37,7 @@ bot.on('connected', () ->
 bot.connect(ROOM);
 bot.on('chat', (data) ->
     lowercase = data.message.toLowerCase()
+    lastUserChats[data.fromID] = Date.now()
     fromBotAdmin = isBotAdmin(data.fromID)
     fromStaff = isRoomStaff(data.fromID)
     if (lowercase.indexOf('bot') isnt -1 or lowercase.indexOf('alfred') isnt -1) and lowercase.indexOf('dance') isnt -1
@@ -63,16 +67,17 @@ bot.on('chat', (data) ->
     else
         console.log(data.from+"> "+data.message)
 )
-
+curVotes = {}
 bot.on('djAdvance', (data) ->
+    curVotes = {}
     if data.djs.length > 0
         currentDJ = data.djs[0].user
     else
         currentDJ = null
+    #console.log data.djs
     clearTimeout(songLengthLimitSkipTimeout)
     clearTimeout songLengthLimitWarnTimeout
     clearTimeout autoSkipTimeout
-    #console.log(data)
     #sconsole.log data.djs[0]
     songLengthRelaxing = false
     if typeof data.media is 'undefined' or data.media is null
@@ -91,7 +96,7 @@ bot.on('djAdvance', (data) ->
         if seconds < 10
             seconds = '0' + seconds
         skipAtStr = hours + mins + ":" + seconds
-        bot.chat "@" + currentDJ.username + "Your song is longer than the limit of " + songLengthLimit + " minutes. Please skip when there is " + skipAtStr + ' remaining.'
+        bot.chat "@" + currentDJ.username + " Your song is longer than the limit of " + songLengthLimit + " minutes. Please skip when there is " + skipAtStr + ' remaining.'
         songLengthLimitWarnTimeout = setTimeout(warnUserSongLengthSkip, (songLengthLimitSeconds - 15) * 1000)
         songLengthLimitSkipTimeout = setTimeout(userSkip, songLengthLimitSeconds * 1000)
 
@@ -102,6 +107,22 @@ bot.on('djAdvance', (data) ->
     #    
     #else if djsInLine <= cycleLimits[0]
         
+)
+bot.on('voteUpdate', (data) ->
+    curVotes[data.id] = data.vote
+    numMehs = 0
+    for userid,vote of curVotes
+        if vote is -1
+            numMehs++
+    if numMehs >= mehLimit
+        skipForShittySong()
+)
+skipForShittySong = () ->
+    bot.chat "@" + currentDJ.username + " your song has been skipped for receiving " + mehLimit + " mehs."
+    userSkip()
+
+bot.on('userJoin', (data) ->
+    lastUserChats[data.id] = Date.now()
 )
 
 reconnect = () ->
@@ -120,23 +141,13 @@ warnUserSongLengthSkip = () ->
     if currentDJ is null
         return
     bot.chat "@"+ currentDJ.username + " you have 15 seconds to skip before being escorted"
-###
-skipUserSongLengthSkip = () ->
+
+userSkip = () ->
     if currentDJ is null
         return
-    console.log 'kick ' + currentDJ.username
-    bot.moderateRemoveDJ(currentDJ.id)
-###
-userSkip = () ->
     console.log 'skipping someone'    
-    bot.moderateRemoveDJ(currentDJ.id,"Too long")
-    return
-    bot.skipSong((data) ->
-        console.log 'skip callback'
-        console.log data
-        return;
-    )
-    bot.moderateForceSkip()
+    bot.skipSong(currentDJ.id)
+    
 isBotAdmin = (userid) ->
     return botadmins.indexOf(userid) isnt -1
 isRoomStaff = (userid) ->

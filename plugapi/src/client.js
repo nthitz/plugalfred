@@ -101,7 +101,7 @@
 
       this.roomId = false;
 
-      this.updateCode = updateCode != undefined ? updateCode : 'p9R*';
+      this.updateCode = updateCode != undefined ? updateCode : '_:8s[H@*dnPe!nNerEM';
 
       if (!key) {
         throw new Error("You must pass the authentication cookie into the PlugAPI object to connect correctly");
@@ -149,15 +149,20 @@
           uri: url,
           method: 'GET'
         }, function(error, response, body) {
-          var m = /var [a-z]=\"([^\"]+)\",[a-z]="([^"]+)",[a-z]="([^"]+)",[a-z]=[a-z]\+[a-z]\+[a-z];return [a-z]/.exec(body);
+          var m = /var [a-z]="([^"]+)",((?:[a-z]="[^"]+",?)+);return [a-z\+]/.exec(body);
           if(m == null) {
+            console.log("Something went wrong, sorry.");
+          } else {
+            var updateCode = m[1];
+            var keyval = m[2].split(",");
+            // m[2] contains the rest of the code, in at least one key=value pair, so let's extract it with another regex
+            for(var i=0;i<keyval.length;i++) {
+              var n = /[a-z]="([^"]+)/.exec(keyval[i]);
+              updateCode += n[1];
+            }
             if(typeof callback == 'function')
-              callback("Something went wrong, sorry.", false);
-            return;
+              callback(false, updateCode);
           }
-          var updateCode = m[1] + m[2] + m[3];
-          if(typeof callback == 'function')
-            callback(false, updateCode);
         });
       });
     };
@@ -289,8 +294,6 @@
     };
 
     PlugAPI.prototype.parseRPCReply = function(name, data) {
-      console.log(name);
-      console.log(data);
       switch (name) {
         case 'room.join':
           this.emit('roomChanged', data);
@@ -563,8 +566,8 @@
       return this.sendRPC("moderate.move_dj", [id, index], callback);
     };
 
-    PlugAPI.prototype.moderateBanUser = function(id, reason, callback) {
-      return this.sendRPC("moderate.ban", [id, reason], callback);
+    PlugAPI.prototype.moderateBanUser = function(id, reason, duration, callback) {
+      return this.sendRPC("moderate.ban", [id, reason, duration], callback);
     };
     
     PlugAPI.prototype.moderateUnBanUser = function(id, callback) {
@@ -579,8 +582,8 @@
       return this.leaveBooth();
     };
 
-    PlugAPI.prototype.skipSong = function(callback) {
-      return this.sendRPC("moderate.skip", [], callback);
+    PlugAPI.prototype.skipSong = function(userid, callback) {
+      return this.sendRPC("moderate.skip", [userid, this.historyID], callback);
     };
 
     PlugAPI.prototype.moderateForceSkip = function() {
