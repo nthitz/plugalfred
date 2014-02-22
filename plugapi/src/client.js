@@ -440,11 +440,10 @@
     PlugAPI.prototype.joinRoom = function(name, callback) {
       var _this = this;
       return this.sendRPC('room.join', [name, _this.updateCode], function(data) {
-        console.log("ROOM.JOIN: ", data);
         _this.actionRPC('room.details', [name], function(data) {
           return _this.initRoom(data, function(data) {
-            _this.emit('joinedRoom', data);
-            if (callback != null) {
+            _this.emit('roomJoin', data);
+            if (typeof callback === 'function') {
               return callback(data);
             }
           });
@@ -513,8 +512,8 @@
       this.room.setSelf(data.user.profile);
       this.room.setDjs(data.room.djs);
       this.room.setMedia(data.room.media, data.room.votes, data.room.curates);
-      this.emit('roomJoin', data);
-//      return callback(data);
+//      this.emit('roomJoin', data);
+      return callback(data);
     };
 
     PlugAPI.prototype.roomRegister = function(name, callback) {
@@ -646,7 +645,7 @@
     }
 
     PlugAPI.prototype.removeDj = function(userid, callback) {
-      return this.actionRPC("moderate.remove_dj", userid, callback);
+      return this.actionRPC("moderate.remove_dj", [userid], callback);
     };
 
     PlugAPI.prototype.moderateRemoveDJ = function(userid) {

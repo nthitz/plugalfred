@@ -31,13 +31,14 @@ bot.on('connected', () ->
         roomStaff = data.room.staff
         if data.room.djs.length > 0
             currentDJ = data.room.djs[0].user
-            console.log currentDJ
-        console.log 'now up ' + currentDJ.username
+            #console.log currentDJ
+            console.log 'now up ' + currentDJ.username
     );
 )
 
 bot.connect(ROOM);
 bot.on('chat', (data) ->
+    #console.log data
     lowercase = data.message.toLowerCase()
     lastUserChats[data.fromID] = Date.now()
     fromBotAdmin = isBotAdmin(data.fromID)
@@ -76,11 +77,9 @@ bot.on('djAdvance', (data) ->
         currentDJ = data.djs[0].user
     else
         currentDJ = null
-    #console.log data.djs
     clearTimeout(songLengthLimitSkipTimeout)
     clearTimeout songLengthLimitWarnTimeout
     clearTimeout autoSkipTimeout
-    #sconsole.log data.djs[0]
     if data.djs.length > enforceAFKAtHowManyDJs
         enforceAFK(data.djs)
     songLengthRelaxing = false
