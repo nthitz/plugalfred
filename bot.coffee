@@ -4,7 +4,7 @@ PlugAPI = require("./plugapi");
 
 AUTH = process.env.AUTH
 ROOM = "mashupfm";
-bot = new PlugAPI(AUTH, "4w@fWs$");
+bot = new PlugAPI(AUTH, "h90");
 
 songLengthLimit = 8
 songLengthLimitSeconds = songLengthLimit * 60
